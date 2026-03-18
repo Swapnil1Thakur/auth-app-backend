@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: auth-app-backend
+  profiles:
+      active: dev
+
+
+#activating the profile
+
+
+server:
+  port: 8082
+
+#configurations here
+
