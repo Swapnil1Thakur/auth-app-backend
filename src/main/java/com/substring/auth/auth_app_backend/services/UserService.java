@@ -10,6 +10,9 @@ public interface UserService {
     //update user
     UserDto updateUser(UserDto userDto, String userId);
 
+    //get user by email
+    UserDto getUserByEmail(String email);
+
     //delete user
     void deleteUser(String userId);
 

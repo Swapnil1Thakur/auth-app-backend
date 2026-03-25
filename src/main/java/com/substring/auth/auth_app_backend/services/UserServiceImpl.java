@@ -3,25 +3,25 @@ package com.substring.auth.auth_app_backend.services;
 import com.substring.auth.auth_app_backend.dtos.UserDto;
 import com.substring.auth.auth_app_backend.entities.Provider;
 import com.substring.auth.auth_app_backend.entities.User;
+import com.substring.auth.auth_app_backend.exceptions.ResourceNotFoundException;
 import com.substring.auth.auth_app_backend.repositories.UserRepository;
-import lombok.Data;
-
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
-@Data
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
 
     //user related save so, user repo is required
-    @Autowired
+
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
 
     @Override
+    @Transactional
     public UserDto createUser(UserDto userDto) {
 
         if(userDto.getEmail() == null || userDto.getEmail().isBlank()){
@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService{
         User user = modelMapper.map(userDto, User.class);
 
         //provider if not null, bring provider else Local will be there in default
-        userDto.setProvider(userDto.getProvider()!=null ? userDto.getProvider() : Provider.LOCAL);
+        user.setProvider(userDto.getProvider()!=null ? userDto.getProvider() : Provider.LOCAL);
 
         //role assign -> to user (for authorization)
 
@@ -56,6 +56,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public UserDto getUserByEmail(String email) {
+       User user =  userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User Not Found with given email id !"));
+        return modelMapper.map(user, UserDto.class);
+    }
+
+    @Override
     public void deleteUser(String userId) {
 
     }
@@ -66,7 +74,11 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    @Transactional
     public Iterable<UserDto> getAllUsers() {
-        return null;
+        return userRepository
+                .findAll()
+                .stream()
+                .map(user -> modelMapper.map(user, UserDto.class)).toList();
     }
 }
