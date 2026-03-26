@@ -1,6 +1,7 @@
 package com.substring.auth.auth_app_backend.controllers;
 
 import com.substring.auth.auth_app_backend.dtos.UserDto;
+import com.substring.auth.auth_app_backend.entities.User;
 import com.substring.auth.auth_app_backend.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,14 @@ public class UserController {
     public ResponseEntity<Iterable<UserDto>> getAllUsers(){
 
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    //get user by email
+    @GetMapping("/email/{email}")
+        public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email){
+            return ResponseEntity.ok(userService.getUserByEmail(email));
+
+
     }
 
 
