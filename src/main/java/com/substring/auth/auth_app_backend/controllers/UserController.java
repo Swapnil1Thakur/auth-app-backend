@@ -16,12 +16,14 @@ public class UserController {
 
     private final UserService userService;
 
+    //create
     //create user api-> POST
     @PostMapping
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto){
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userDto));
     }
 
+    //get
     @GetMapping
     //get all users api -> GET
     public ResponseEntity<Iterable<UserDto>> getAllUsers(){
@@ -29,13 +31,34 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    //get user by email
+    //get
+    //getting user by email
     @GetMapping("/email/{email}")
-        public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email){
+        public ResponseEntity<UserDto> getUserByEmail(@PathVariable("email") String email){
             return ResponseEntity.ok(userService.getUserByEmail(email));
-
-
     }
+
+    //get
+    //getting user by id
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserDto> getUserById( @PathVariable ("userId") String userId){
+        return ResponseEntity.ok(userService.getUserById(userId));
+    }
+
+    //delete user
+    //url -> /api/v1/users/{userId}
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable("userId")  String userId){
+        userService.deleteUser(userId);
+    }
+
+    //update user
+    @PutMapping("/{userId}")
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto, @PathVariable("userId") String userId){
+        return ResponseEntity.ok(userService.updateUser(userDto,userId));
+    }
+
+
 
 
 

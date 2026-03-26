@@ -4,11 +4,15 @@ import com.substring.auth.auth_app_backend.dtos.UserDto;
 import com.substring.auth.auth_app_backend.entities.Provider;
 import com.substring.auth.auth_app_backend.entities.User;
 import com.substring.auth.auth_app_backend.exceptions.ResourceNotFoundException;
+import com.substring.auth.auth_app_backend.helpers.UserHelper;
 import com.substring.auth.auth_app_backend.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +33,7 @@ public class UserServiceImpl implements UserService{
         }
 
         if(userRepository.existsByEmail(userDto.getEmail())){
-            throw new IllegalArgumentException("Email already exists");
+            throw new IllegalArgumentException("User with given email already exists");
         }
 
         //extra checks here
@@ -52,7 +56,36 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserDto updateUser(UserDto userDto, String userId) {
-        return null;
+
+        //parse first
+        UUID uId = UserHelper.parseUUID(userId);
+
+        //fetch old user here first
+        User existingUser = userRepository
+                .findById(uId)
+                .orElseThrow(() -> new ResourceNotFoundException("User Id not found !!"));
+
+        //updating the fields
+        //we are not going to change email id for this project
+        //remaining we are doing
+        if(userDto.getName()!=null) existingUser.setName(userDto.getName());
+        if(userDto.getImage()!=null) existingUser.setImage(userDto.getImage());
+        if(userDto.getProvider()!=null) existingUser.setProvider(userDto.getProvider());
+
+        //TODO change the password updation logic..
+        //since with encode the password in backend(hashed)
+        if(userDto.getPassword()!=null) existingUser.setPassword(userDto.getPassword());
+        existingUser.setEnable(userDto.isEnable()); //for enable
+        existingUser.setUpdatedAt(Instant.now());
+
+        //save it now
+        User updatedUser = userRepository.save(existingUser);
+
+        return modelMapper.map(updatedUser, UserDto.class);
+
+
+
+
     }
 
     @Override
@@ -65,12 +98,22 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void deleteUser(String userId) {
+        //parsing string uid to UUID object
+        UUID uId = UserHelper.parseUUID(userId);
+
+        //going to repository and now delete
+        User user = userRepository.findById(uId).orElseThrow(() -> new ResourceNotFoundException("User Id not found !!"));
+        userRepository.delete(user);
 
     }
 
     @Override
     public UserDto getUserById(String userId) {
-        return null;
+
+        User user = userRepository.findById(UserHelper.parseUUID(userId)).orElseThrow(() -> new ResourceNotFoundException("User Id not found !!"));
+        return modelMapper.map(user, UserDto.class);
+
+
     }
 
     @Override
