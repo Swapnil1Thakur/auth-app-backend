@@ -68,7 +68,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email;  //isko main username maanta hu, islie return kr rha hu (login yahi se hoga)
+        return this.email;  //isko main username maanta hu, islie return kr rha hu (login yahi se hoga ....)
     }
 
     @Override
