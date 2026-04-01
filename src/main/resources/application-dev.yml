@@ -20,3 +20,7 @@ spring:
 
 
 #jpa and configurations
+
+logging:
+  level:
+    org.springframework.security: DEBUG
