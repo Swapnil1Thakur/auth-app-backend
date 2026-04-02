@@ -2,8 +2,7 @@ package com.substring.auth.auth_app_backend.security;
 
 import com.substring.auth.auth_app_backend.entities.Role;
 import com.substring.auth.auth_app_backend.entities.User;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,6 +81,32 @@ public class JwtService{
 
 
 
-    //generate refresh token
+    //parse token now:
+    public Jws<Claims> parse(String token){
+        try{
+            return Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
 
+        }catch(JwtException e){
+            throw  e;
+        }
+    }
+
+    public boolean isAccessToken(String token){
+        Claims c = parse(token).getPayload();
+        return "access".equals(c.get("typ"));
+    }
+
+    public boolean isRefreshToken(String token){
+        Claims c = parse(token).getPayload();
+        return "refresh".equals(c.get("typ"));
+    }
+
+    public UUID getUserId(String token){
+        Claims c = parse(token).getPayload();
+        return UUID.fromString(c.getSubject());
+    }
+
+    public String getJti(String token){
+        return parse(token).getPayload().getId();
+    }
 }
