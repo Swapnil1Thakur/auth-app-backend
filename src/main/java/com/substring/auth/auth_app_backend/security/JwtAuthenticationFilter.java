@@ -8,11 +8,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -48,6 +52,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Token se userId nikala → pata chala request kis user ki hai,
                 // par token pe blind trust nahi (user exist/enable/roles check nahi hote),
                 // isliye DB se user uthake verify karke hi authentication banate hain
+                //so ->
+                userRepository.findById(userUuid)
+                        .ifPresent(user -> {
+                             //user mil chuka h database se
+                            //Agar roles null hain, toh .stream() se error aa sakta hai isliye empty list use karte hain (no permissions),
+                            // aur agar roles present hain, toh unhe Spring Security ke samajhne wale format GrantedAuthority mein convert karte hain taaki system decide kar sake user kya actions perform kar sakta hai.
+                            List<GrantedAuthority> authorities = user.getRoles() == null  ? List.of() : user.getRoles().stream()
+                                    .map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+
+
+                        });
+
 
 
 
