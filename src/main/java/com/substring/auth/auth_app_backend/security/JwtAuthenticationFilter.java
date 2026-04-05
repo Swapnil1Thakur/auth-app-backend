@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private  final JwtService jwtService;
+    private final JwtService jwtService;
     private final UserRepository userRepository;
 
     @Override
@@ -37,15 +37,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         // 2. check
-        if(header!=null && header.startsWith("Bearer" )){
+        if (header != null && header.startsWith("Bearer")) {
 
             //token extract -> token validate -> authentication create -> set in authentication context
 
             //1. extracting token
             String token = header.substring(7);
 
+            //check //work only if it is access token
+            if(!jwtService.isAccessToken(token)){
+                //message pass
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             //2. token parse (exception might come)
-            try{
+            try {
                 //parse jwt token
                 Jws<Claims> parse = jwtService.parse(token);
 
@@ -60,56 +67,58 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 //so ->
                 userRepository.findById(userUuid)
                         .ifPresent(user -> {
-                             //user mil chuka h database se
-                            //Agar roles null hain, toh .stream() se error aa sakta hai isliye empty list use karte hain (no permissions),
-                            // aur agar roles present hain, toh unhe Spring Security ke samajhne wale format GrantedAuthority mein convert karte hain taaki system decide kar sake user kya actions perform kar sakta hai.
-                            List<GrantedAuthority> authorities = user.getRoles() == null  ? List.of() : user.getRoles().stream()
-                                    .map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+
+                            //check for user enable or not
+                            if(user.isEnable()){
+                                //user mil chuka h database se
+                                //Agar roles null hain, toh .stream() se error aa sakta hai isliye empty list use karte hain (no permissions),
+                                // aur agar roles present hain, toh unhe Spring Security ke samajhne wale format GrantedAuthority mein convert karte hain taaki system decide kar sake user kya actions perform kar sakta hai.
+                                List<GrantedAuthority> authorities = user.getRoles() == null ? List.of() : user.getRoles().stream()
+                                        .map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+
+
+                                //Authentication object bana ke Spring Security ko bataya jaata hai ki user kaun hai aur kya kar sakta hai
+
+                                //creating authentication object
+                                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                        user.getEmail(), null, authorities);
+
+                                // ye line authentication ke saath request ki extra details (IP, session) attach karti hai"
+                                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                                //Spring Security ke current request context me authentication set ho rahi hai
+                                //mtlb -> Ye line batati hai ki current request ka user authenticated hai
+                                //final line: to set the authentication to the security context
+                                //null raha -> toh hi set krenge
+
+                                if(SecurityContextHolder.getContext().getAuthentication()==null)
+                                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                            }
 
 
 
-                            //Authentication object bana ke Spring Security ko bataya jaata hai ki user kaun hai aur kya kar sakta hai
 
-                            //creating authentication object
-                            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                                    user.getEmail() , null , authorities);
-
-                            // ye line authentication ke saath request ki extra details (IP, session) attach karti hai"
-                            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                            //Spring Security ke current request context me authentication set ho rahi hai
-                            //mtlb -> Ye line batati hai ki current request ka user authenticated hai
-                            //final line: to the authentication to the security context
-                            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-
-                            
 
 
                         });
 
 
-
-
-
-
-
-            }catch(ExpiredJwtException e){
+            } catch (ExpiredJwtException e) {
                 e.printStackTrace();
 
-            }catch (MalformedJwtException e){
+            } catch (MalformedJwtException e) {
                 e.printStackTrace();
 
-            }catch(JwtException e){
+            } catch (JwtException e) {
                 e.printStackTrace();
 
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
         }
 
         //upar nahi chala
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 }
