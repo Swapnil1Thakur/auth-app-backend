@@ -8,8 +8,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -60,6 +65,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             // aur agar roles present hain, toh unhe Spring Security ke samajhne wale format GrantedAuthority mein convert karte hain taaki system decide kar sake user kya actions perform kar sakta hai.
                             List<GrantedAuthority> authorities = user.getRoles() == null  ? List.of() : user.getRoles().stream()
                                     .map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+
+
+
+                            //Authentication object bana ke Spring Security ko bataya jaata hai ki user kaun hai aur kya kar sakta hai
+
+                            //creating authentication object
+                            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                    user.getEmail() , null , authorities);
+
+                            // ye line authentication ke saath request ki extra details (IP, session) attach karti hai"
+                            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                            //Spring Security ke current request context me authentication set ho rahi hai
+                            //mtlb -> Ye line batati hai ki current request ka user authenticated hai
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+
+                            
 
 
                         });
