@@ -79,6 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                             //Spring Security ke current request context me authentication set ho rahi hai
                             //mtlb -> Ye line batati hai ki current request ka user authenticated hai
+                            //final line: to the authentication to the security context
                             SecurityContextHolder.getContext().setAuthentication(authentication);
 
 
