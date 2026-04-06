@@ -1,4 +1,5 @@
 package com.substring.auth.auth_app_backend.config;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.substring.auth.auth_app_backend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +53,11 @@ public class SecurityConfig {
                     e.printStackTrace();
                     response.setStatus(401);
                     response.setContentType("application/json");
-                    String message = "unauthorized ascess" + e.getMessage();
+                    String message = "unauthorized access" + e.getMessage();
 
                     Map<String, Object> errorMap = Map.of("message",message, "status", String.valueOf(401), "statusCode",Integer.toString(401));
+                    var objectMapper = new ObjectMapper();
+                    response.getWriter().write(objectMapper.writeValueAsString(errorMap));
 
                 }))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
