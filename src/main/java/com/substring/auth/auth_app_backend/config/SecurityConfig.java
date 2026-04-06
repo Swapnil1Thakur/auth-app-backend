@@ -15,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.util.Map;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -35,7 +37,16 @@ public class SecurityConfig {
 
                                      .anyRequest().authenticated()
         )
-                .httpBasic(Customizer.withDefaults());
+                //.httpBasic(Customizer.withDefaults());
+                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, e) -> {
+                    e.printStackTrace();
+                    response.setStatus(401);
+                    response.setContentType("application/json");
+                    String message = "unauthorized ascess" + e.getMessage();
+
+                    Map<String, Object> errorMap = Map.of("message",message , "statusCode", 404);
+
+                }));
 
         return http.build();
     }
