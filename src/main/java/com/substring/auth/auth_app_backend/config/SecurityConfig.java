@@ -1,4 +1,7 @@
 package com.substring.auth.auth_app_backend.config;
+import com.substring.auth.auth_app_backend.security.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,12 +17,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Map;
+
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
@@ -39,14 +47,17 @@ public class SecurityConfig {
         )
                 //.httpBasic(Customizer.withDefaults());
                 .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, e) -> {
+
+                    //error message
                     e.printStackTrace();
                     response.setStatus(401);
                     response.setContentType("application/json");
                     String message = "unauthorized ascess" + e.getMessage();
 
-                    Map<String, Object> errorMap = Map.of("message",message , "statusCode", 404);
+                    Map<String, Object> errorMap = Map.of("message",message, "status", String.valueOf(401), "statusCode",Integer.toString(401));
 
-                }));
+                }))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
