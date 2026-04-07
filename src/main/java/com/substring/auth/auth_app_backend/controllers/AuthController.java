@@ -14,6 +14,14 @@ public class AuthController {
 
     private final AuthService authService;
 
+
+    //token generate kr rha hoga ye
+    @PostMapping("/login")
+    public ResponseEntity<TokenResponse> login(){
+
+
+    }
+
     @PostMapping("/register")
     public ResponseEntity<UserDto> registerUser(@RequestBody UserDto userDto){
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerUser(userDto));
