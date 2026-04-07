@@ -1,5 +1,7 @@
 package com.substring.auth.auth_app_backend.controllers;
 
+import com.substring.auth.auth_app_backend.dtos.LoginRequest;
+import com.substring.auth.auth_app_backend.dtos.TokenResponse;
 import com.substring.auth.auth_app_backend.dtos.UserDto;
 import com.substring.auth.auth_app_backend.services.AuthService;
 import lombok.AllArgsConstructor;
@@ -17,7 +19,9 @@ public class AuthController {
 
     //token generate kr rha hoga ye
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(){
+    public ResponseEntity<TokenResponse> login(
+            @RequestBody LoginRequest loginRequest
+    ){
 
 
     }
