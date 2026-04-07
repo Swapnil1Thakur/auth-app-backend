@@ -8,6 +8,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,11 +32,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
+    private Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         //header check
         String header = request.getHeader("Authorization");
+        logger.info("Authorization header : {}", header);
+
 
         // 2. check
         if (header != null && header.startsWith("Bearer")) {
@@ -44,15 +50,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             //1. extracting token
             String token = header.substring(7);
 
-            //check //work only if it is access token
-            if(!jwtService.isAccessToken(token)){
-                //message pass
-                filterChain.doFilter(request, response);
-                return;
-            }
-
             //2. token parse (exception might come)
             try {
+
+                //check //work only if it is access token
+                if(!jwtService.isAccessToken(token)){
+                    //message pass
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+
                 //parse jwt token
                 Jws<Claims> parse = jwtService.parse(token);
 
