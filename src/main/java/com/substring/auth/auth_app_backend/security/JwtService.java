@@ -4,7 +4,9 @@ import com.substring.auth.auth_app_backend.entities.Role;
 import com.substring.auth.auth_app_backend.entities.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
+@Getter
+@Setter
 
 public class JwtService{
     private final SecretKey key;
@@ -57,7 +61,7 @@ public class JwtService{
                         "roles", roles,
                         "typ", "access"
                 ))
-                .signWith(key, SignatureAlgorithm.ES512)
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
 
@@ -74,7 +78,7 @@ public class JwtService{
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(refreshTtlSeconds)))
                 .claim("typ", "refresh")
-                .signWith(key, SignatureAlgorithm.ES512)
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
 
