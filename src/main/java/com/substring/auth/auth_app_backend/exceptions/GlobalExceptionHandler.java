@@ -1,13 +1,36 @@
 package com.substring.auth.auth_app_backend.exceptions;
 
 import com.substring.auth.auth_app_backend.dtos.ErrorResponse;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    //
+    @ExceptionHandler({
+           UsernameNotFoundException.class,
+           BadCredentialsException.class,
+            CredentialsExpiredException.class,
+            ExpiredJwtException.class,
+            JwtException.class,
+            AuthenticationException.class             //writing exceptions
+    })
+    public ResponseEntity<ApiError> handleAuthException(Exception e, HttpServletRequest request){
+
+
+
+    }
 
     //resource not found exception handler :: method
     @ExceptionHandler(ResourceNotFoundException.class)
