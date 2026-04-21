@@ -1,0 +1,17 @@
+package com.substring.auth.auth_app_backend.dtos;
+
+import java.time.OffsetDateTime;
+
+public record ApiError(
+        int status,
+        String error,
+        String message,
+        String path,
+        OffsetDateTime timestamp
+
+) {
+
+      public static ApiError of(int status, String error, String message, String path, OffsetDateTime timestamp){
+          return new ApiError(status, error, message, path, timestamp);
+      }
+}
