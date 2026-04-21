@@ -12,6 +12,6 @@ public record ApiError(
 ) {
 
       public static ApiError of(int status, String error, String message, String path, OffsetDateTime timestamp){
-          return new ApiError(status, error, message, path, timestamp);
+          return new ApiError(status, error, message, path, OffsetDateTime.now());
       }
 }
