@@ -1,6 +1,7 @@
 package com.substring.auth.auth_app_backend.dtos;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 public record ApiError(
         int status,
@@ -12,6 +13,6 @@ public record ApiError(
 ) {
 
       public static ApiError of(int status, String error, String message, String path, OffsetDateTime timestamp){
-          return new ApiError(status, error, message, path, OffsetDateTime.now());
+          return new ApiError(status, error, message, path, OffsetDateTime.now(ZoneOffset.UTC));
       }
 }
