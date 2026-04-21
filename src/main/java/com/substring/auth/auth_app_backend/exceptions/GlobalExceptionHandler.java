@@ -1,5 +1,6 @@
 package com.substring.auth.auth_app_backend.exceptions;
 
+import com.substring.auth.auth_app_backend.dtos.ApiError;
 import com.substring.auth.auth_app_backend.dtos.ErrorResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -22,8 +23,6 @@ public class GlobalExceptionHandler {
            UsernameNotFoundException.class,
            BadCredentialsException.class,
             CredentialsExpiredException.class,
-            ExpiredJwtException.class,
-            JwtException.class,
             AuthenticationException.class             //writing exceptions
     })
     public ResponseEntity<ApiError> handleAuthException(Exception e, HttpServletRequest request){
